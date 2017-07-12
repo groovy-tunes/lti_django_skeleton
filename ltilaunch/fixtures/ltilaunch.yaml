@@ -1,0 +1,65 @@
+- model: sites.site
+  pk: 1
+  fields: {domain: '127.0.0.1:8000', name: Localhost port 8000}
+- model: auth.user
+  pk: 1
+  fields:
+    password: pbkdf2_sha256$24000$1l9xw7Pkwj32$DzqNgpV732GEWFpepBMqV/0EnH/+VZp185k15OnFB/o=
+    last_login: 2016-06-06 13:29:05.892203+00:00
+    is_superuser: true
+    username: admin
+    first_name: ''
+    last_name: ''
+    email: admin@example.com
+    is_staff: true
+    is_active: true
+    date_joined: 2016-06-06 13:11:54.553244+00:00
+    groups: []
+    user_permissions: []
+- model: auth.user
+  pk: 2
+  fields:
+    password: pbkdf2_sha256$24000$1l9xw7Pkwj32$DzqNgpV732GEWFpepBMqV/0EnH/+VZp185k15OnFB/o=
+    last_login: 2016-06-06 13:29:05.892203+00:00
+    is_superuser: true
+    username: whatever
+    first_name: ''
+    last_name: ''
+    email: nope@me.com
+    is_staff: true
+    is_active: true
+    date_joined: 2016-06-06 13:11:54.553244+00:00
+    groups: []
+    user_permissions: []
+- model: ltilaunch.ltitoolconsumergroup
+  pk: 1
+  fields: {name: FakeLMS}
+- model: ltilaunch.ltitoolconsumer
+  pk: 1
+  fields: {name: Fake LMS, description: It's not a real LMS, oauth_consumer_key: 7sXsDv7cPmNPlJD9cVsfylRn3JASmPyvxyIvw2Z1,
+    oauth_consumer_secret: iLL7J3r33beqLT5qZtss37WyJB9TgrUzc2oRjUZo, tool_consumer_instance_guid: fakelmsguid,
+    match_guid_and_consumer: true, recent_nonces: '[]', consumer_group: 1, matcher_class_name: ''}
+- model: ltilaunch.ltiuser
+  pk: 1
+  fields:
+    user: 2
+    lti_tool_consumer: 1
+    lti_user_id: ade4ea9150fabd4ed32e0c27defd20ef6979c940
+    last_launch_parameters: {context_id: 6dea912122e999239a4663d99fc96ee4507a10bd,
+      context_label: Critical Thinking, context_title: Critical Thinking, custom_canvas_api_domain: unizin.instructure.com,
+      custom_canvas_course_id: '23378', custom_canvas_enrollment_state: active, custom_canvas_user_id: '182',
+      ext_ims_lis_basic_outcome_url: 'http://ltiapps.net/test/tc-outcomes.php/api/lti/v1/tools/63258/ext_grade_passback',
+      ext_outcome_data_values_accepted: 'url,text', launch_presentation_document_target: iframe,
+      launch_presentation_locale: en-GB, launch_presentation_return_url: 'http://ltiapps.net/test/tc-return.php/courses/1623302',
+      lis_outcome_service_url: 'http://ltiapps.net/test/tc-outcomes.php/api/lti/v1/tools/63258/grade_passback',
+      lis_person_contact_email_primary: shirley@garbage.com, lis_person_name_family: Manson,
+      lis_person_name_full: Shirley Manson, lis_person_name_given: Shirley, lis_result_sourcedid: '51b5818580dbc6adc991b6c390a8948c:::6dea912122e999239a4663d99fc96ee4507a10bd:::ade4ea9150fabd4ed32e0c27defd20ef6979c940:::63258-1623302-6419650-3558075-c29475ac7148e0213a9d7e7367061cce46c6d9f2',
+      lti_message_type: basic-lti-launch-request, lti_version: LTI-1p0, oauth_callback: 'about:blank',
+      oauth_consumer_key: 7sXsDv7cPmNPlJD9cVsfylRn3JASmPyvxyIvw2Z1, oauth_nonce: 906f126a2af201462115a476cb239924,
+      oauth_signature: 79pBowU1HKMECjfJ6rAU9CoaFXs=, oauth_signature_method: HMAC-SHA1,
+      oauth_timestamp: '1470923307', oauth_version: '1.0', resource_link_id: 6c91bbd81282ca4b12c02887e8b71bcaef2a38e2,
+      resource_link_title: Essential text, roles: Learner, tool_consumer_info_product_family_code: canvas,
+      tool_consumer_info_version: cloud, tool_consumer_instance_contact_email: dev@unizin.org,
+      tool_consumer_instance_guid: fakelmsguid, tool_consumer_instance_name: Fake
+        LMS, user_id: ade4ea9150fabd4ed32e0c27defd20ef6979c940, user_image: 'https://secure.gravatar.com/avatar/000?s=50&d=https%3A%2F%2Fcanvas.instructure.com%2Fimages%2Fmessages%2Favatar-50.png'}
+    last_launch_time: "2016-08-11 13:48:29.456369+00:00"
