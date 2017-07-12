@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from lti import ToolConfig
+from lti_django_skeleton.models import Role, Course
 
 def error(exception=None):
     """ render error page

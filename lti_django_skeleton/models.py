@@ -4,9 +4,12 @@ import re
 import os
 import json
 import logging
+
+from django.db import models
+
 from ltilaunch.models import LTIUser
 
-class Course(Models.model):
+class Course(models.Model):
     name = CharField(max_length=255)
     owner_id = ForeignKey(LTIUser, on_delete=models.CASCADE)
     service = CharField(max_length=80, default="")
@@ -33,7 +36,7 @@ class Course(Models.model):
         else:
             return lti_course
 
-class Role(Models.model):
+class Role(models.Model):
     name = CharField(max_length=80)
     user = ForeignKey(LTIUser, on_delete=models.CASCADE)
     course = ForeignKey(Course, on_delete=models.CASCADE)
@@ -43,7 +46,7 @@ class Role(Models.model):
     def __str__(self):
         return '<User {} is {}>'.format(self.user, self.name)
 
-class Settings(Models.model):
+class Settings(models.Model):
     mode = CharField(max_length=80)
     connected = CharField(max_length=80)
     user = ForeignKey(LTIUser, on_delete=models.CASCADE)
@@ -51,7 +54,7 @@ class Settings(Models.model):
     def __str__(self):
         return '<{} settings ({})>'.format(self.user_id, self.id)
 
-class Submission(Models.model):
+class Submission(models.Model):
     code = TextField(default="")
     status = IntegerField(default=0)
     correct = BooleanField(default=False)
@@ -288,7 +291,8 @@ class Assignment(Base):
     def by_course(course_id, exclude_builtins=True):
         if exclude_builtins:
             course = Course.objects.get(pk=course_id)
-            return (Assignment.objects.filter(course=course, mode!='maze')
+            return (Assignment.objects.filter(course=course)
+						                        .exclude(mode=maze)
                                     .all())
         else:
             return Assignment.objects.filter(course=course)
