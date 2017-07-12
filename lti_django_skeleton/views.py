@@ -12,7 +12,7 @@ def error(exception=None):
     :param exception: optional exception
     :return: the error.html template rendered
     """
-    print exception
+    print(exception)
     if request.method == 'POST':
         params = request.form.to_dict()
     else:
