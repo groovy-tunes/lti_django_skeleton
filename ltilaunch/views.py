@@ -6,6 +6,7 @@ from django.template.response import SimpleTemplateResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView, View
+from django.shortcuts import redirect
 
 from . import LTIUSER_SESSION_KEY
 from .models import lti_launch_return_url, LTIToolProvider, get_lti_user, \
@@ -28,6 +29,7 @@ class LaunchView(View):
         return super(LaunchView, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
+        print("@ HERE")
         return self.authorize(request)
 
     def authorize(self, request):
@@ -36,7 +38,9 @@ class LaunchView(View):
         if lti_user:
             login(request, lti_user)
             self._set_session_data(request)
-            result = HttpResponseRedirect(self.tool_provider_url, status=303)
+            print("@ A")
+            result = redirect(self.tool_provider_url)
+            print("@ B")
         return result
 
     @staticmethod
