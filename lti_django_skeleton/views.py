@@ -2,8 +2,23 @@ from django.views.generic import View
 from django.urls import reverse
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
 
 from lti import ToolConfig
+
+def error(exception=None):
+    """ render error page
+
+    :param exception: optional exception
+    :return: the error.html template rendered
+    """
+    print exception
+    if request.method == 'POST':
+        params = request.form.to_dict()
+    else:
+        params = request.args.to_dict()
+    return render_template('error.html')
+
 
 def ensure_canvas_arguments(request):
     """
@@ -20,7 +35,8 @@ def ensure_canvas_arguments(request):
                              context_title,
                              request.user.id)
 
-    return roles, course
+    return request.user, roles, course
+
 
 class ConfigView(View):
     """
@@ -49,6 +65,7 @@ class ConfigView(View):
 
         return HttpResponse(lti_tool_config.to_xml(), content_type='text/xml')
 
+
 def index(request, a_id, a_g_id):
     """
     Initial access page to the lti provider.  This page provides
@@ -59,8 +76,7 @@ def index(request, a_id, a_g_id):
     """
     assignment_id = a_id
     assignment_group_id = a_g_id
-    user = request.user
-    roles, course = ensure_canvas_arguments(request)
+    user, roles, course = ensure_canvas_arguments(request)
     # Assignment group or individual assignment?
     if assignment_group_id is not None:
         group = AssignmentGroup.by_id(assignment_group_id)
@@ -91,3 +107,58 @@ def index(request, a_id, a_g_id):
         return render_template('lti/index.html', lti=lti,
                                group=zip(assignments, submissions),
                                user_id=user.id)
+
+
+def select(request):
+    """
+    Let's the user select from a list of assignments.
+
+    :param request: HttpRequest
+    :return: the select.html template rendered
+    """
+    user, roles, course = ensure_canvas_arguments(request)
+    assignments = Assignment.by_course(course.id, exclude_builtins=True)
+    groups = [(group, group.get_assignments())
+              for group in AssignmentGroup.by_course(course.id)]
+    strays = AssignmentGroup.get_ungrouped_assignments(course.id)
+    return_url = request.user.last_launch_parameters.get('launch_presentation_return_url', None)
+
+    return render_template('lti/select.html', assignments=assignments, strays=strays, groups=groups, return_url=return_url, menu='select')
+
+
+@login_required
+def check_assignments(request):
+    """
+    An AJAX endpoint for listing any new assignments.
+
+    Unused.
+    """
+    # Store current user_id and context_id
+    user, roles, course = ensure_canvas_arguments()
+    assignments = Assignment.by_course(course.id)
+    return jsonify(success=True, assignments=[a.to_dict() for a in assignments])
+
+
+@login_required
+def save_code(request):
+    assignment_id = request.form.get('question_id', None)
+    assignment_version = int(request.form.get('version', -1))
+    if assignment_id is None:
+        return jsonify(success=False, message="No Assignment ID given!")
+    code = request.form.get('code', '')
+    filename = request.form.get('filename', '__main__')
+    user = User.from_lti("canvas", session["pylti_user_id"],
+                         session.get("user_email", ""),
+                         session.get("lis_person_name_given", ""),
+                         session.get("lis_person_name_family", ""))
+    is_version_correct = True
+    if filename == "__main__":
+        submission, is_version_correct = Submission.save_code(user.id, assignment_id, code, assignment_version)
+    elif User.is_lti_instructor(session["roles"]):
+        if filename == "on_run":
+            Assignment.edit(assignment_id=assignment_id, on_run=code)
+        elif filename == "on_change":
+            Assignment.edit(assignment_id=assignment_id, on_step=code)
+        elif filename == "starting_code":
+            Assignment.edit(assignment_id=assignment_id, on_start=code)
+    return jsonify(success=True, is_version_correct=is_version_correct)
