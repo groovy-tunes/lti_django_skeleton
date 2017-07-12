@@ -69,7 +69,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend'
 ]
 
-ROOT_URLCONF = 'lti_django_skeleton.urls'
+ROOT_URLCONF = 'dev_skeleton.urls'
 
 TEMPLATES = [
     {
@@ -87,7 +87,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'lti_django_skeleton.wsgi.application'
+WSGI_APPLICATION = 'dev_skeleton.wsgi.application'
 
 
 # Database
@@ -95,8 +95,12 @@ WSGI_APPLICATION = 'lti_django_skeleton.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'ltidev',
+        'USER': 'ltidev',
+        'PASSWORD': '',
+        'HOST': 'localhost',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                               # Set to empty string for default.
     }
 }
 
