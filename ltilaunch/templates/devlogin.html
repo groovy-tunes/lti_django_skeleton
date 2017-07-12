@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LTI Dev Login</title>
+</head>
+<body>
+<form method="post">
+    <select name="lti_user_id">
+        {% for item in object_list %}
+            <option value="{{ item.id }}">{{ item.user.username }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit">
+</form>
+</body>
+</html>
