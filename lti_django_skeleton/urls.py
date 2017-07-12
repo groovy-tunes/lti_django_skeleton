@@ -6,7 +6,6 @@ from ltilaunch.views import LaunchView
 
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
     url(r'^config$', views.ConfigView.as_view(),
         name='lti_config'),
     url(r'^launch$', LaunchView.as_view(),
