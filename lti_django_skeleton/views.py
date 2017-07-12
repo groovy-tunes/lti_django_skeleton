@@ -65,7 +65,7 @@ class ConfigView(View):
 
         return HttpResponse(lti_tool_config.to_xml(), content_type='text/xml')
 
-
+@login_required
 def index(request, a_id, a_g_id):
     """
     Initial access page to the lti provider.  This page provides
@@ -108,7 +108,7 @@ def index(request, a_id, a_g_id):
                                group=zip(assignments, submissions),
                                user_id=user.id)
 
-
+@login_required
 def select(request):
     """
     Let's the user select from a list of assignments.
