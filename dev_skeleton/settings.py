@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ltilaunch',
+    'lti_django_skeleton',
 ]
 
 MIDDLEWARE = [
