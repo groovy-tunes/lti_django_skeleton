@@ -207,7 +207,7 @@ class AssignmentGroup(Base):
     def remove(assignment_group_id):
         targ_group = AssignmentGroup.objects.get(assignment_group_id)
         AssignmentGroup.objects.get(pk=assignment_group_id).delete()
-        AssignmentGroupMembership.query.filter_by(assignment_group=targ_group).delete()
+        AssignmentGroupMembership.objects.filter(assignment_group=targ_group).delete()
 
     @staticmethod
     def edit(assignment_group_id, name=None):

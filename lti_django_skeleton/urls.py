@@ -16,4 +16,14 @@ urlpatterns = [
 		    name='lti_launch_select'),
     url(r'^select$', views.select,
         name='lti_select'),
+    url(r'^check_assignments$', views.check_assignments,
+        name='lti_check_assignments'),
+    url(r'^save_code$', views.save_code,
+        name='lti_save_code'),
+    url(r'^save_events', views.save_events,
+        name='lti_save_events'),
+    url(r'^save_correct$', views.save_correct,
+        name='lti_save_correct')
+    url(r'^get_submission_code/(?P<submission_id>[0-9]+)$', views.get_submission_code,
+        name='get_submission_code')
 ]
