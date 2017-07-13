@@ -29,7 +29,6 @@ class LaunchView(View):
         return super(LaunchView, self).dispatch(request, *args, **kwargs)
 
     def post(self, request):
-        print("@ HERE")
         return self.authorize(request)
 
     def authorize(self, request):
@@ -38,9 +37,7 @@ class LaunchView(View):
         if lti_user:
             login(request, lti_user)
             self._set_session_data(request)
-            print("@ A")
             result = redirect(self.tool_provider_url)
-            print("@ B")
         return result
 
     @staticmethod
