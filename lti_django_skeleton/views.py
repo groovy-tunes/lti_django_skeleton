@@ -95,27 +95,27 @@ def index(request, a_id, a_g_id):
     # Use the proper template
     if assignments[0].mode == 'maze':
         context = {
-            assignment= assignments[0],
-            submission= submissions[0],
-            level=assignments[0].name,
-            user_id=user.id
+            'assignment': assignments[0],
+            'submission': submissions[0],
+            'level': assignments[0].name,
+            'user_id': user.id
         }
         return render(request, 'lti/maze.html', context)
     elif assignments[0].mode == 'explain':
         MAX_QUESTIONS = 5
         code, elements = submissions[0].load_explanation(MAX_QUESTIONS)
         context = {
-            assignment= assignments[0],
-            submission= submissions[0],
-            code = code,
-            elements=elements,
-            user_id=user.id
+            'assignment': assignments[0],
+            'submission': submissions[0],
+            'code': code,
+            'elements': elements,
+            'user_id': user.id
         }
         return render(request, 'lti/explain.html', context)
     else:
         context = {
-            group=zip(assignments, submissions),
-            user_id=user.id
+            'group': zip(assignments, submissions),
+            'user_id': user.id
         }
         return render(request, 'lti/index.html', context)
 
