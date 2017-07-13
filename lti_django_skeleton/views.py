@@ -241,4 +241,4 @@ def get_submission_code(request):
 
 @login_required
 def test(request):
-    return render(request, 'test.html')
+    return render(request, 'lti_django_skeleton/test.html')
