@@ -27,6 +27,6 @@ urlpatterns = [
     url(r'^get_submission_code/(?P<submission_id>[0-9]+)$', views.get_submission_code,
         name='get_submission_code'),
     #TESTING
-    url(r'^testing$', views.test,
-        name='lti_test')
+    url(r'^launch/(?P<id>[0-9]+)$', LaunchView.as_view(tool_provider_url='get_submission_code'),
+        name='lti_launch_test')
 ]
