@@ -37,7 +37,9 @@ class LaunchView(View):
         if lti_user:
             login(request, lti_user)
             self._set_session_data(request)
-            result = redirect(self.tool_provider_url)
+            print("@ FOR TESTING")
+
+            result = redirect(self.tool_provider_url + '/' + self.kwargs['id'])
         return result
 
     @staticmethod
