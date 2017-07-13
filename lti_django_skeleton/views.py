@@ -237,3 +237,8 @@ def get_submission_code(request):
         return submission.code if submission.code else "#No code given!"
     else:
         return "Sorry, you do not have sufficient permissions to spy!"
+
+
+@login_required
+def test(request):
+    return render(request, 'test.html')
