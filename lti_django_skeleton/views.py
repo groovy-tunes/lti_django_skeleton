@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 
 from lti import ToolConfig
 from lti_django_skeleton.models import Role, Course
+from ltilaunch.models import LTIUser
 
 def error(exception=None):
     """ render error page
@@ -28,15 +29,16 @@ def ensure_canvas_arguments(request):
     :param request: the incoming HttpRequest
     :return: roles and course of user
     """
-    roles = Role.objects.filter(user=request.user)
-    context_id = request.user.last_launch_parameters.get("context_id", "")
-    context_title = request.user.last_launch_parameters.get("context_title", "")
+    user = LTIUser.objects.get(user=request.user)
+    roles = Role.objects.filter(user=user)
+    context_id = user.last_launch_parameters.get("context_id", "")
+    context_title = user.last_launch_parameters.get("context_title", "")
     course = Course.from_lti("canvas",
                              context_id,
                              context_title,
-                             request.user.id)
+                             user.id)
 
-    return request.user, roles, course
+    return user, roles, course
 
 
 class ConfigView(View):

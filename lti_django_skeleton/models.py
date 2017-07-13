@@ -25,7 +25,7 @@ class Base(models.Model):
 
 class Course(Base):
     name = models.CharField(max_length=255)
-    owner_id = models.ForeignKey(LTIUser, on_delete=models.CASCADE)
+    owner = models.ForeignKey(LTIUser, on_delete=models.CASCADE)
     service = models.CharField(max_length=80, default="")
     external_id = models.CharField(max_length=255, default="")
 
@@ -34,7 +34,8 @@ class Course(Base):
 
     @staticmethod
     def new_lti_course(service, external_id, name, user_id):
-        new_course = Course(name=name, owner_id=user_id,
+        owner = LTIUser.objects.get(pk=user_id)
+        new_course = Course(name=name, owner=owner,
                             service=service, external_id=external_id)
         new_course.save()
         return new_course
