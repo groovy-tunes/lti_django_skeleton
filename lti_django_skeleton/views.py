@@ -8,7 +8,7 @@ from django.shortcuts import render
 from lti import ToolConfig
 from lti_django_skeleton.models import Role, Course
 from ltilaunch.models import LTIUser
-from lti_django_skeleton.models import Assignment, AssignmentGroup
+from lti_django_skeleton.models import Assignment, AssignmentGroup, Submission
 
 def error(exception=None):
     """ render error page
@@ -229,16 +229,10 @@ def save_correct(request):
 
 
 @login_required
-def get_submission_code(request):
-    user, roles, course = ensure_canvas_arguments()
-    submission_id = self.kwargs['submission_id']
+def get_submission_code(request, submission_id):
+    user, roles, course = ensure_canvas_arguments(request)
     submission = Submission.objects.get(pk=submission_id)
-    if User.is_lti_instructor(roles) or submission.user.id == user.id:
-        return submission.code if submission.code else "#No code given!"
+    if LTIUser.is_lti_instructor(roles) or submission.user.id == user.id:
+        return HttpResponse(submission.code) if submission.code else "#No code given!"
     else:
-        return "Sorry, you do not have sufficient permissions to spy!"
-
-
-@login_required
-def test(request):
-    return render(request, 'lti_django_skeleton/test.html')
+        return HttpResponse("Sorry, you do not have sufficient permissions to spy!")
