@@ -148,7 +148,7 @@ class Assignment(Base):
         if exclude_builtins:
             course = Course.objects.get(pk=course_id)
             return (Assignment.objects.filter(course=course)
-						                        .exclude(mode=maze)
+						                        .exclude(mode='maze')
                                     .all())
         else:
             return Assignment.objects.filter(course=course)
@@ -225,7 +225,7 @@ class AssignmentGroup(Base):
     def by_course(course_id):
         course = Course.objects.get(pk=course_id)
         return (AssignmentGroup.objects.filter(course=course)
-                                     .order_by(AssignmentGroup.name)
+                                     .order_by('name')
                                      .all())
 
     @staticmethod
@@ -233,8 +233,7 @@ class AssignmentGroup(Base):
         course = Course.objects.get(pk=course_id)
         return (Assignment.objects
                           .filter(course=course)
-                          .outerjoin(AssignmentGroupMembership)
-                          .filter(AssignmentGroupMembership.assignment_id==None)
+                          .filter(assignmentgroupmembership__assignment__isnull=True)
                           .all())
 
     def get_assignments(self):
@@ -273,7 +272,7 @@ class Submission(Base):
     status = models.IntegerField(default=0)
     correct = models.BooleanField(default=False)
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    user= models.ForeignKey(LTIUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(LTIUser, on_delete=models.CASCADE)
     assignment_version = models.IntegerField(default=0)
     version = models.IntegerField(default=0)
 
