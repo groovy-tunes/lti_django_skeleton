@@ -8,7 +8,7 @@ from ltilaunch.views import LaunchView
 urlpatterns = [
     url(r'^config$', views.ConfigView.as_view(),
         name='lti_config'),
-    url(r'^launch$', LaunchView.as_view(tool_provider_url='lti_test'),
+    url(r'^launch$', LaunchView.as_view(tool_provider_url='get_submission_code'),
         name='lti_launch'),
     url(r'^index/(?P<a_id>[0-9]+)/(?P<a_g_id>[0-9]+)$', views.index,
         name='lti_index'),
@@ -26,7 +26,4 @@ urlpatterns = [
         name='lti_save_correct'),
     url(r'^get_submission_code/(?P<submission_id>[0-9]+)$', views.get_submission_code,
         name='get_submission_code'),
-    #TESTING
-    url(r'^launch/(?P<id>[0-9]+)$', LaunchView.as_view(tool_provider_url='get_submission_code'),
-        name='lti_launch_test')
 ]
