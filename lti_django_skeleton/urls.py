@@ -25,5 +25,5 @@ urlpatterns = [
     url(r'^save_correct$', views.save_correct,
         name='lti_save_correct'),
     url(r'^get_submission_code/(?P<submission_id>[0-9]+)$', views.get_submission_code,
-        name='get_submission_code')
+        name='get_submission_code'),
 ]
