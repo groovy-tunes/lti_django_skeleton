@@ -12,7 +12,7 @@ urlpatterns = [
         name='lti_launch'),
     url(r'^index/(?P<a_id>[0-9]+)/(?P<a_g_id>[0-9]+)$', views.index,
         name='lti_index'),
-    url(r'^launch/select$', LaunchView.as_view(tool_provider_url='/select'),
+    url(r'^launch/select$', LaunchView.as_view(tool_provider_url='lti_select'),
 		    name='lti_launch_select'),
     url(r'^select$', views.select,
         name='lti_select'),
