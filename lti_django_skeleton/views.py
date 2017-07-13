@@ -3,10 +3,12 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 
 from lti import ToolConfig
 from lti_django_skeleton.models import Role, Course
 from ltilaunch.models import LTIUser
+from lti_django_skeleton.models import Assignment, AssignmentGroup
 
 def error(exception=None):
     """ render error page
@@ -124,9 +126,16 @@ def select(request):
     groups = [(group, group.get_assignments())
               for group in AssignmentGroup.by_course(course.id)]
     strays = AssignmentGroup.get_ungrouped_assignments(course.id)
-    return_url = request.user.last_launch_parameters.get('launch_presentation_return_url', None)
+    return_url = user.last_launch_parameters.get('launch_presentation_return_url', None)
 
-    return render_template('lti/select.html', assignments=assignments, strays=strays, groups=groups, return_url=return_url, menu='select')
+    context = {
+        'assignments': assignments,
+				'strays': strays,
+				'groups': groups,
+				'return_url': return_url,
+				'menu': 'select'
+    }
+    return render(request, 'lti/select.html', context)
 
 
 @login_required
