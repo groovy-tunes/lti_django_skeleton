@@ -94,24 +94,31 @@ def index(request, a_id, a_g_id):
         return error()
     # Use the proper template
     if assignments[0].mode == 'maze':
-        return render_template('lti/maze.html', lti=lti,
-                               assignment= assignments[0],
-                               submission= submissions[0],
-                               level=assignments[0].name,
-                               user_id=user.id)
+        context = {
+            assignment= assignments[0],
+            submission= submissions[0],
+            level=assignments[0].name,
+            user_id=user.id
+        }
+        return render(request, 'lti/maze.html', context)
     elif assignments[0].mode == 'explain':
         MAX_QUESTIONS = 5
         code, elements = submissions[0].load_explanation(MAX_QUESTIONS)
-        return render_template('lti/explain.html', lti=lti,
-                               assignment= assignments[0],
-                               submission= submissions[0],
-                               code = code,
-                               elements=elements,
-                               user_id=user.id)
+        context = {
+            assignment= assignments[0],
+            submission= submissions[0],
+            code = code,
+            elements=elements,
+            user_id=user.id
+        }
+        return render(request, 'lti/explain.html', context)
     else:
-        return render_template('lti/index.html', lti=lti,
-                               group=zip(assignments, submissions),
-                               user_id=user.id)
+        context = {
+            group=zip(assignments, submissions),
+            user_id=user.id
+        }
+        return render(request, 'lti/index.html', context)
+
 
 @login_required
 def select(request):
@@ -174,3 +181,59 @@ def save_code(request):
         elif filename == "starting_code":
             Assignment.edit(assignment_id=assignment_id, on_start=code)
     return jsonify(success=True, is_version_correct=is_version_correct)
+
+
+@login_required
+def save_events(request):
+    assignment_id = request.form.get('question_id', None)
+    event = request.form.get('event', "blank")
+    action = request.form.get('action', "missing")
+    if assignment_id is None:
+        return jsonify(success=False, message="No Assignment ID given!")
+    user = User.from_lti("canvas", session["pylti_user_id"],
+                         session.get("user_email", ""),
+                         session.get("lis_person_name_given", ""),
+                         session.get("lis_person_name_family", ""))
+    log = Log.new(event, action, assignment_id, user.id)
+    return jsonify(success=True)
+
+
+@login_required
+def save_correct(request):
+    assignment_id = request.form.get('question_id', None)
+    status = float(request.form.get('status', "0.0"))
+    lis_result_sourcedid = request.form.get('lis_result_sourcedid', None)
+    if assignment_id is None:
+        return jsonify(success=False, message="No Assignment ID given!")
+    user = User.from_lti("canvas", session["pylti_user_id"],
+                         session.get("user_email", ""),
+                         session.get("lis_person_name_given", ""),
+                         session.get("lis_person_name_family", ""))
+    assignment = Assignment.by_id(assignment_id)
+    if status == 1:
+        submission = Submission.save_correct(user.id, assignment_id)
+    else:
+        submission = assignment.get_submission(user.id)
+    if submission.correct:
+        message = "Success!"
+    else:
+        message = "Incomplete"
+    url = url_for('lti_assignments.get_submission_code', submission_id=submission.id, _external=True)
+    if lis_result_sourcedid is None:
+        return jsonify(success=False, message="Not in a grading context.")
+    if assignment.mode == 'maze':
+        lti.post_grade(float(submission.correct), "<h1>{0}</h1>".format(message), endpoint=lis_result_sourcedid);
+    else:
+        lti.post_grade(float(submission.correct), "<h1>{0}</h1>".format(message)+"<div>Latest work in progress: <a href='{0}' target='_blank'>View</a></div>".format(url)+"<div>Touches: {0}</div>".format(submission.version)+"Last ran code:<br>"+highlight(submission.code, PythonLexer(), HtmlFormatter()), endpoint=lis_result_sourcedid)
+    return jsonify(success=True)
+
+
+@login_required
+def get_submission_code(request):
+    user, roles, course = ensure_canvas_arguments()
+    submission_id = self.kwargs['submission_id']
+    submission = Submission.objects.get(pk=submission_id)
+    if User.is_lti_instructor(roles) or submission.user.id == user.id:
+        return submission.code if submission.code else "#No code given!"
+    else:
+        return "Sorry, you do not have sufficient permissions to spy!"
