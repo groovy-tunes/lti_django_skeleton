@@ -80,7 +80,7 @@ class Assignment(Base):
     on_step = models.TextField(default="def on_step(code, output, properties):\n    return True")
     on_start = models.TextField(default="")
     answer = models.TextField(default="")
-    due = models.DateTimeField(default=None)
+    due = models.DateTimeField(default=None, null=True, blank=True)
     type = models.CharField(max_length=10, default="normal")
     visibility = models.CharField(max_length=10, default="visible")
     disabled = models.CharField(max_length=10, default="enabled")
@@ -136,7 +136,7 @@ class Assignment(Base):
         owner = LTIUser.objects.get(pk=owner_id)
         course = Course.objects.get(pk=course_id)
         assignment = Assignment(owner=owner, course=course)
-        assignement.save()
+        assignment.save()
         return assignment
 
     @staticmethod

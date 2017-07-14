@@ -49,7 +49,7 @@ def ensure_canvas_arguments(request):
     :return: roles and course of user
     """
     user = LTIUser.objects.get(user=request.user)
-    roles = Role.objects.filter(user=user)
+    roles = user.last_launch_parameters.get("roles", "")
     context_id = user.last_launch_parameters.get("context_id", "")
     context_title = user.last_launch_parameters.get("context_title", "")
     course = Course.from_lti("canvas",
@@ -252,7 +252,6 @@ def get_submission_code(request, submission_id):
     if LTIUser.is_lti_instructor(roles) or submission.user.id == user.id:
         return HttpResponse(submission.code) if submission.code else "#No code given!"
     else:
-<<<<<<< HEAD
         return "Sorry, you do not have sufficient permissions to spy!"
 
 
@@ -274,13 +273,13 @@ def save_presentation(request):
 
 @login_required
 def new_assignment(request, menu):
-    user, roles, course = ensure_canvas_arguments()
+    user, roles, course = ensure_canvas_arguments(request)
     if not LTIUser.is_lti_instructor(roles):
-        return "You are not an instructor in this course."
+        return HttpResponse("You are not an instructor in this course.")
     assignment = Assignment.new(owner_id=user.id, course_id=course.id)
     launch_type = 'lti_launch_url' if menu != 'share' else 'iframe'
     endpoint = 'lti_index' if menu != 'share' else 'lti_shared'
-    select = url_quote(reverse(endpoint, kwargs={'assignment_id': assignment.id, '_external': True}))+"/return_type="+launch_type+"/title="+url_quote(assignment.title())+"/BlockPy%20Exercise/100%25/600"
+    select = url_quote(reverse(endpoint, kwargs={'assignment_id': assignment.id}))+"/return_type="+launch_type+"/title="+url_quote(assignment.title())+"/BlockPy%20Exercise/100%25/600"
     return JsonResponse({
         'success': True,
         'redirect': reverse('lti_edit_assignment', kwargs={'assignment_id': assignment.id}),
@@ -292,6 +291,3 @@ def new_assignment(request, menu):
         'edit': reverse('lti_edit_assignment', kwargs={'assignment_id': assignment.id}),
         'date_modified': assignment.date_modified.strftime(" %I:%M%p on %a %d, %b %Y").replace(" 0", " ")
     })
-=======
-        return HttpResponse("Sorry, you do not have sufficient permissions to spy!")
->>>>>>> b9ce1b6216f0be12ed7bf51a765c6473ab575f53
