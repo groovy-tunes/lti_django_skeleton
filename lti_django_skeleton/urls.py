@@ -24,6 +24,13 @@ urlpatterns = [
         name='lti_save_events'),
     url(r'^save_correct$', views.save_correct,
         name='lti_save_correct'),
+    url(r'^save_presentation$', views.save_presentation,
+        name='lti_save_presentation'),
     url(r'^get_submission_code/(?P<submission_id>[0-9]+)$', views.get_submission_code,
-        name='get_submission_code'),
+        name='lti_get_submission_code'),
+    url(r'^assignment/new/(?P<menu>[a-zA-Z]*)$', views.new_assignment,
+        name='lti_new_assignment'),
+    #TESTING
+    url(r'^launch/(?P<id>[0-9]+)$', LaunchView.as_view(tool_provider_url='get_submission_code'),
+        name='lti_launch_test')
 ]
