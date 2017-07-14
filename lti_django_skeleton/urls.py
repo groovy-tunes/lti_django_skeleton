@@ -30,4 +30,16 @@ urlpatterns = [
         name='lti_get_submission_code'),
     url(r'^assignment/new/(?P<menu>[a-zA-Z]*)$', views.new_assignment,
         name='lti_new_assignment'),
+    url(r'^assignment/remove/(?P<assignment_id>[0-9]+)$', views.remove_assignment,
+        name='lti_remove_assignment'),
+    url(r'^assignment/get/(?P<assignment_id>[0-9]+)$', views.get_assignment,
+        name='lti_get_assignment'),
+    url(r'^edit_assignment/(?P<assignment_id>[0-9]+)$', views.edit_assignment,
+        name='lti_edit_assignment'),
+    url(r'^batch_edit$', views.batch_edit,
+        name='lti_batch_edit'),
+    url(r'^dashboard$', views.dashboard,
+        name='lti_dashboard'),
+    url(r'^share$', views.share,
+        name='lti_share')
 ]

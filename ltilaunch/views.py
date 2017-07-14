@@ -13,7 +13,6 @@ from .models import lti_launch_return_url, LTIToolProvider, get_lti_user, \
     LTIUser
 from .utils import absolute_url_for_path, as_https
 
-
 def unauthorized_response():
     result = SimpleTemplateResponse(template="lti_launch_failure.html")
     result.status_code = 401
