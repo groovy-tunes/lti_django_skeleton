@@ -1,14 +1,31 @@
 from django.views.generic import View
 from django.urls import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from urllib.parse import quote as url_quote
+from urllib.parse import urlencode
+from html.parser import HTMLParser
 
 from lti import ToolConfig
 from lti_django_skeleton.models import Role, Course
 from ltilaunch.models import LTIUser
 from lti_django_skeleton.models import Assignment, AssignmentGroup
+
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ''.join(self.fed)
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
+
 
 def error(exception=None):
     """ render error page
@@ -240,5 +257,38 @@ def get_submission_code(request):
 
 
 @login_required
-def test(request):
-    return render(request, 'lti_django_skeleton/test.html')
+def save_presentation(request):
+    assignment_id = request.form.get('question_id', None)
+    if assignment_id is None:
+        return jsonify(success=False, message="No Assignment ID given!")
+    presentation = request.form.get('presentation', "")
+    parsons = request.form.get('parsons', "false") == "true"
+    text_first = request.form.get('text_first', "false") == "true"
+    name = request.form.get('name', "")
+    if User.is_lti_instructor(session["roles"]):
+        Assignment.edit(assignment_id=assignment_id, presentation=presentation, name=name, parsons=parsons, text_first=text_first)
+        return jsonify(success=True)
+    else:
+        return jsonify(success=False, message="You are not an instructor!")
+
+
+@login_required
+def new_assignment(request, menu):
+    user, roles, course = ensure_canvas_arguments()
+    if not LTIUser.is_lti_instructor(roles):
+        return "You are not an instructor in this course."
+    assignment = Assignment.new(owner_id=user.id, course_id=course.id)
+    launch_type = 'lti_launch_url' if menu != 'share' else 'iframe'
+    endpoint = 'lti_index' if menu != 'share' else 'lti_shared'
+    select = url_quote(reverse(endpoint, kwargs={'assignment_id': assignment.id, '_external': True}))+"/return_type="+launch_type+"/title="+url_quote(assignment.title())+"/BlockPy%20Exercise/100%25/600"
+    return JsonResponse({
+        'success': True,
+        'redirect': reverse('lti_edit_assignment', kwargs={'assignment_id': assignment.id}),
+        'id': assignment.id,
+        'name': assignment.name,
+        'body': strip_tags(assignment.body)[:255],
+        'title': assignment.title(),
+        'select': select,
+        'edit': reverse('lti_edit_assignment', kwargs={'assignment_id': assignment.id}),
+        'date_modified': assignment.date_modified.strftime(" %I:%M%p on %a %d, %b %Y").replace(" 0", " ")
+    })
