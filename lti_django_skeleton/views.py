@@ -11,7 +11,7 @@ from html.parser import HTMLParser
 from lti import ToolConfig
 from lti_django_skeleton.models import Role, Course
 from ltilaunch.models import LTIUser
-from lti_django_skeleton.models import Assignment, AssignmentGroup
+from lti_django_skeleton.models import Assignment, AssignmentGroup, Submission
 
 class MLStripper(HTMLParser):
     def __init__(self):
@@ -246,13 +246,13 @@ def save_correct(request):
 
 
 @login_required
-def get_submission_code(request):
-    user, roles, course = ensure_canvas_arguments()
-    submission_id = self.kwargs['submission_id']
+def get_submission_code(request, submission_id):
+    user, roles, course = ensure_canvas_arguments(request)
     submission = Submission.objects.get(pk=submission_id)
-    if User.is_lti_instructor(roles) or submission.user.id == user.id:
-        return submission.code if submission.code else "#No code given!"
+    if LTIUser.is_lti_instructor(roles) or submission.user.id == user.id:
+        return HttpResponse(submission.code) if submission.code else "#No code given!"
     else:
+<<<<<<< HEAD
         return "Sorry, you do not have sufficient permissions to spy!"
 
 
@@ -292,3 +292,6 @@ def new_assignment(request, menu):
         'edit': reverse('lti_edit_assignment', kwargs={'assignment_id': assignment.id}),
         'date_modified': assignment.date_modified.strftime(" %I:%M%p on %a %d, %b %Y").replace(" 0", " ")
     })
+=======
+        return HttpResponse("Sorry, you do not have sufficient permissions to spy!")
+>>>>>>> b9ce1b6216f0be12ed7bf51a765c6473ab575f53
