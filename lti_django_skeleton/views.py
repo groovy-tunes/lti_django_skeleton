@@ -81,7 +81,7 @@ class ConfigView(View):
 
 
 @login_required
-def index(request, a_id, a_g_id):
+def index(request):
     """
     Initial access page to the lti provider.  This page provides
     authorization for the user.
@@ -89,8 +89,8 @@ def index(request, a_id, a_g_id):
     :param request: HttpRequest
     :return: index page for lti provider
     """
-    assignment_id = a_id
-    assignment_group_id = a_g_id
+    assignment_id = request.GET.get('assignment_id', None)
+    assignment_group_id = request.GET.get('assignment_group_id', None)
     user, roles, course = ensure_canvas_arguments(request)
     # Assignment group or individual assignment?
     if assignment_group_id is not None:
@@ -286,17 +286,17 @@ def save_presentation(request):
             'message': "You are not an instructor!"
         })
 
-#@login_required
+@login_required
 def new_assignment(request, menu):
-#user, roles, course = ensure_canvas_arguments(request)
+user, roles, course = ensure_canvas_arguments(request)
     user = LTIUser.objects.get(pk=1)
     course = Course.objects.get(pk=1)
-#    if not LTIUser.is_lti_instructor(roles):
-#        return HttpResponse("You are not an instructor in this course.")
+   if not LTIUser.is_lti_instructor(roles):
+       return HttpResponse("You are not an instructor in this course.")
     assignment = Assignment.new(owner_id=user.id, course_id=course.id)
     launch_type = 'lti_launch_url' if menu != 'share' else 'iframe'
     endpoint = 'lti_index' if menu != 'share' else 'lti_shared'
-    select = url_quote(reverse(endpoint, kwargs={'assignment_id': assignment.id}))+"/return_type="+launch_type+"/title="+url_quote(assignment.title())+"/BlockPy%20Exercise/100%25/600"
+    select = url_quote(reverse(endpoint))+"?assignment_id="+assignment_id+"&return_type="+launch_type+"&title="+url_quote(assignment.title())+"&text=BlockPy%20Exercise&width=100%25&height=600"
     return JsonResponse({
         'success': True,
         'redirect': reverse('lti_edit_assignment', kwargs={'assignment_id': assignment.id}),
@@ -364,8 +364,8 @@ def get_assignment(request, assignment_id):
 
 @login_required
 def select_builtin_assignment(request):
-    assignment_type = request.args.get('assignment_type', None)
-    assignment_id = request.args.get('assignment_id', None)
+    assignment_type = request.GET.get('assignment_type', None)
+    assignment_id = request.GET.get('assignment_id', None)
     user, roles, course = ensure_canvas_arguments(request)
     if not User.is_lti_instructor(roles):
         return HttpResponse("You are not an instructor in this course.")
@@ -453,8 +453,8 @@ def shared(request):
     :param request: the Django HttpRequest
     :return: the staff.html template rendered
     """
-    assignment_id = request.args.get('assignment_id', None)
-    assignment_group_id = request.args.get('assignment_group_id', None)
+    assignment_id = request.GET.get('assignment_id', None)
+    assignment_group_id = request.GET.get('assignment_group_id', None)
     user, roles, course = ensure_canvas_arguments()
     # Assignment group or individual assignment?
     if assignment_group_id is not None:
@@ -508,6 +508,5 @@ def grade(request):
     submission = Submission.save_correct(user.id, assignment_id)
     if 'lis_result_sourcedid' not in session:
         return "Failure"
-    #session[''] = session['lis_outcome_service_url']
     lti.post_grade(1, "<h1>Success</h1>"+highlight(submission.code, PythonLexer(), HtmlFormatter()))
     return HttpResponse("Successful!")
