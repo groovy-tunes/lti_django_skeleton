@@ -4,25 +4,15 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.utils.html import MLStripper
 from urllib.parse import quote as url_quote
 from urllib.parse import urlencode
-from html.parser import HTMLParser
+
 
 from lti import ToolConfig
 from lti_django_skeleton.models import Role, Course
 from ltilaunch.models import LTIUser
 from lti_django_skeleton.models import Assignment, AssignmentGroup, Submission
-
-
-class MLStripper(HTMLParser):
-    def __init__(self):
-        self.reset()
-        self.fed = []
-    def handle_data(self, d):
-        self.fed.append(d)
-    def get_data(self):
-        return ''.join(self.fed)
-
 
 def strip_tags(html):
     s = MLStripper()
@@ -265,11 +255,13 @@ def save_presentation(request):
     else:
         return jsonify(success=False, message="You are not an instructor!")
 
-@login_required
+#@login_required
 def new_assignment(request, menu):
-    user, roles, course = ensure_canvas_arguments(request)
-    if not LTIUser.is_lti_instructor(roles):
-        return HttpResponse("You are not an instructor in this course.")
+#user, roles, course = ensure_canvas_arguments(request)
+    user = LTIUser.objects.get(pk=1)
+    course = Course.objects.get(pk=1)
+#    if not LTIUser.is_lti_instructor(roles):
+#        return HttpResponse("You are not an instructor in this course.")
     assignment = Assignment.new(owner_id=user.id, course_id=course.id)
     launch_type = 'lti_launch_url' if menu != 'share' else 'iframe'
     endpoint = 'lti_index' if menu != 'share' else 'lti_shared'
@@ -295,7 +287,7 @@ def remove_assignment(request, assignment_id):
         return JsonResponse(success=False, message="You are not an instructor in this course.")
     # TODO: Security hole, evil instructors could remove assignments outside of their course
     Assignment.remove(assignment_id)
-    return JsonResponse(success=True)
+    return JsonResponse({'success': True})
 
 @login_required
 def get_assignment(request, assignment_id):
@@ -309,16 +301,24 @@ def get_assignment(request, assignment_id):
         return JsonResponse(success=False, message="You are not an instructor in this course.")
     # TODO: Security hole, evil instructors could remove assignments outside of their course
     assignment = Assignment.by_id(assignment_id)
-    return JsonResponse(success=True, url=assignment.url, name=assignment.name,
-                   body= strip_tags(assignment.body)[:255],
-                   on_run=assignment.on_run,
-                   title= assignment.title(),
-                   answer=assignment.answer, type=assignment.type,
-                   visibility=assignment.visibility, disabled=assignment.disabled,
-                   mode=assignment.mode, version=assignment.version,
-                   id=assignment.id, course_id=assignment.course_id,
-                   date_modified = assignment.date_modified.strftime(" %I:%M%p on %a %d, %b %Y").replace(" 0", " "))
-
+    return JsonResponse({
+		    'success': True, 
+				'url': assignment.url, 
+				'name': assignment.name,
+        'body': strip_tags(assignment.body)[:255],
+        'on_run': assignment.on_run,
+        'title': assignment.title(),
+        'answer': assignment.answer, 
+				'type': assignment.type,
+        'visibility': assignment.visibility, 
+				'disabled': assignment.disabled,
+        'mode': assignment.mode, 
+				'version': assignment.version,
+        'id': assignment.id, 
+				'course_id': assignment.course_id,
+        'date_modified': assignment.date_modified.strftime(" %I:%M%p on %a %d, %b %Y").replace(" 0", " ")    
+		})
+	
 @login_required
 def select_builtin_assignment(request):
     assignment_type = request.args.get('assignment_type', None)
@@ -331,7 +331,7 @@ def select_builtin_assignment(request):
     assignment_url = url_for('lti_assignments.index',
                                     assignment_id=assignment.id,
                                     _external=True)
-    print assignment_url
+    print(assignment_url)
     encoded_url = url_quote(assignment_url)
     return jsonify(url=encoded_url)
 
@@ -340,13 +340,13 @@ def edit_assignment(request, assignment_id):
     user, roles, course = ensure_canvas_arguments(request)
     assignment = Assignment.by_id(assignment_id)
     if not assignment:
-        return "Assignment ID not found"
+        return HttpResponse("Assignment ID not found")
     if not LTIUser.is_lti_instructor(roles):
-        return "You are not an instructor in this course."
+        return HttpResponse("You are not an instructor in this course.")
     if not assignment.context_is_valid(course.external_id):
-        return "This assignment does not belong to this course."
+        return HttpResponse("This assignment does not belong to this course.")
     submission = assignment.get_submission(user.id)
-
+    submission = assignment.get_submission(1)
     return render_template('lti/edit.html',
                            assignment=assignment,
                            submission=submission,
@@ -427,7 +427,7 @@ def shared(request):
                                user_id=user.id)
 
 @login_required
-def grade(lti=lti):
+def grade(request):
     """
     Post grade
 
